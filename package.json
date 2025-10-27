@@ -1,0 +1,17 @@
+{
+  "name": "paid-honeypot",
+  "version": "1.0.0",
+  "description": "A single-page web application that functions as a 'honeypot' to capture leads and automatically upsell them to a high-ticket service.",
+  "main": "api/generate.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.1.0",
+    "@supabase/supabase-js": "^2.0.0",
+    "resend": "^1.0.0"
+  }
+}

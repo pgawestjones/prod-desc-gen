@@ -1,0 +1,26 @@
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+.animated-gradient-background {
+  background: linear-gradient(
+    -45deg,
+    #f8fafc,
+    #e2e8f0,
+    #f1f5f9,
+    #e0e7ff,
+    #faf5ff,
+    #f0f9ff
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+  min-height: 100vh;
+}

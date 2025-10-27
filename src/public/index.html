@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Product Description Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="animated-gradient-background text-gray-800">
+
+    <div class="container mx-auto max-w-2xl px-4 py-12">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900">Stop Writing Bad Product Descriptions. Let AI Do It for Free.</h1>
+            <p class="text-lg text-gray-600 mt-2">Enter your product details and get a persuasive, SEO-friendly description in seconds. We'll email you the result for your records.</p>
+        </header>
+
+        <main>
+            <form id="generate-form" class="bg-white p-8 rounded-lg shadow-2xl">
+                <div class="mb-4">
+                    <label for="productName" class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+                    <input
+                        type="text"
+                        id="productName"
+                        name="productName"
+                        placeholder="e.g., 'Men's Leather Wallet'"
+                        maxlength="100"
+                        required
+                        pattern="[a-zA-Z0-9\s\-\.,]+"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        title="Please enter a valid product name (letters, numbers, spaces, and basic punctuation only)">
+                    <span class="text-xs text-gray-500 mt-1">Maximum 100 characters</span>
+                </div>
+
+                <div class="mb-4">
+                    <label for="productFeatures" class="block text-sm font-medium text-gray-700 mb-1">Product Features</label>
+                    <textarea
+                        id="productFeatures"
+                        name="productFeatures"
+                        rows="4"
+                        maxlength="2000"
+                        required
+                        pattern="[a-zA-Z0-9\s\-\.,\n]+"
+                        placeholder="e.g., 'RFID blocking, full-grain leather, slim design, 6 card slots, cash pocket'"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        title="Please describe product features (letters, numbers, spaces, and basic punctuation only)"></textarea>
+                    <span class="text-xs text-gray-500 mt-1">Maximum 2000 characters</span>
+                </div>
+
+                <div class="mb-6">
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Your Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your business email"
+                        maxlength="254"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        title="Please enter a valid email address">
+                    <span class="text-xs text-gray-500 mt-1">We'll send your generated description here</span>
+                </div>
+
+                <button type="submit" id="submitButton" class="w-full bg-indigo-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed">
+                    Generate My Description
+                </button>
+            </form>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="hidden text-center mt-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <p class="mt-2 text-gray-600">Generating...</p>
+            </div>
+
+            <!-- Result Area -->
+            <div id="result-container" class="hidden bg-white p-8 rounded-lg shadow-md mt-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Here's Your AI-Generated Description:</h3>
+                <div id="resultOutput" class="bg-gray-50 p-4 border border-gray-200 rounded-md whitespace-pre-wrap font-mono text-sm"></div>
+            </div>
+
+            <!-- Error Area -->
+            <div id="errorOutput" class="text-red-600 mt-4 text-center font-medium"></div>
+        </main>
+
+        <footer class="mt-12 pb-8">
+            <div class="container mx-auto max-w-2xl px-4 text-center">
+                <p class="text-sm text-gray-500">
+                    By using this service, you agree to our
+                    <a href="#" onclick="showPrivacyModal()" class="text-indigo-600 hover:text-indigo-800 underline">Privacy Policy</a>
+                    and
+                    <a href="#" onclick="showTermsModal()" class="text-indigo-600 hover:text-indigo-800 underline">Terms of Service</a>.
+                </p>
+                <p class="text-xs text-gray-400 mt-2">
+                    We respect your data. No spam, ever.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Privacy Policy</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">
+                        We collect your email address to send you the generated product description and follow-up emails about our services. We do not sell or share your data with third parties. You can opt out of emails at any time.
+                    </p>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button onclick="closePrivacyModal()" class="px-4 py-2 bg-indigo-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms of Service Modal -->
+    <div id="termsModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Terms of Service</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">
+                        This service provides AI-generated product descriptions for informational purposes. You are responsible for reviewing and editing content before use. We are not liable for any damages arising from the use of generated content.
+                    </p>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button onclick="closeTermsModal()" class="px-4 py-2 bg-indigo-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const generateForm = document.getElementById('generate-form');
+        const submitButton = document.getElementById('submitButton');
+        const loadingState = document.getElementById('loading-state');
+        const resultContainer = document.getElementById('result-container');
+        const resultOutput = document.getElementById('resultOutput');
+        const errorOutput = document.getElementById('errorOutput');
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            
+            // 1. Clear previous results/errors
+            resultContainer.classList.add('hidden');
+            errorOutput.textContent = '';
+            resultOutput.textContent = '';
+
+            // 2. Show loading state
+            submitButton.disabled = true;
+            submitButton.textContent = 'Generating...';
+            loadingState.classList.remove('hidden');
+
+            // 3. Get form values
+            const productName = document.getElementById('productName').value;
+            const productFeatures = document.getElementById('productFeatures').value;
+            const email = document.getElementById('email').value;
+
+            // 4. Enhanced client-side validation
+            const validationResult = validateInputs(productName, productFeatures, email);
+            if (!validationResult.valid) {
+                errorOutput.textContent = validationResult.error;
+                hideLoading();
+                return;
+            }
+
+            try {
+                // 5. Make fetch request
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ productName, productFeatures, email }),
+                });
+
+                // 6. Handle response
+                if (response.ok) {
+                    const data = await response.json();
+                    resultOutput.textContent = data.description;
+                    resultContainer.classList.remove('hidden');
+                } else {
+                    const errorData = await response.json();
+                    errorOutput.textContent = errorData.error || 'An unknown error occurred.';
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                errorOutput.textContent = 'A network error occurred. Please try again.';
+            } finally {
+                // 7. Hide loading state
+                hideLoading();
+            }
+        }
+
+        // Enhanced client-side validation function
+        function validateInputs(productName, productFeatures, email) {
+            // Check for empty fields
+            if (!productName || productName.trim().length === 0) {
+                return { valid: false, error: 'Product name is required.' };
+            }
+
+            if (!productFeatures || productFeatures.trim().length === 0) {
+                return { valid: false, error: 'Product features are required.' };
+            }
+
+            if (!email || email.trim().length === 0) {
+                return { valid: false, error: 'Email address is required.' };
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.trim())) {
+                return { valid: false, error: 'Please enter a valid email address.' };
+            }
+
+            // Length validation
+            if (productName.trim().length > 100) {
+                return { valid: false, error: 'Product name must be 100 characters or less.' };
+            }
+
+            if (productFeatures.trim().length > 2000) {
+                return { valid: false, error: 'Product features must be 2000 characters or less.' };
+            }
+
+            if (email.trim().length > 254) {
+                return { valid: false, error: 'Email address is too long.' };
+            }
+
+            // Content validation - prevent obvious injection attempts
+            const dangerousPatterns = [
+                /<script/i,
+                /javascript:/i,
+                /on\w+\s*=/i,
+                /expression\s*\(/i
+            ];
+
+            for (const pattern of dangerousPatterns) {
+                if (pattern.test(productName) || pattern.test(productFeatures)) {
+                    return { valid: false, error: 'Invalid characters detected. Please use only standard text.' };
+                }
+            }
+
+            return { valid: true };
+        }
+
+        function hideLoading() {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Generate My Description';
+            loadingState.classList.add('hidden');
+        }
+
+        // Modal functions
+        function showPrivacyModal() {
+            document.getElementById('privacyModal').classList.remove('hidden');
+        }
+
+        function closePrivacyModal() {
+            document.getElementById('privacyModal').classList.add('hidden');
+        }
+
+        function showTermsModal() {
+            document.getElementById('termsModal').classList.remove('hidden');
+        }
+
+        function closeTermsModal() {
+            document.getElementById('termsModal').classList.add('hidden');
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const privacyModal = document.getElementById('privacyModal');
+            const termsModal = document.getElementById('termsModal');
+
+            if (event.target == privacyModal) {
+                closePrivacyModal();
+            }
+            if (event.target == termsModal) {
+                closeTermsModal();
+            }
+        }
+
+        generateForm.addEventListener('submit', handleSubmit);
+    </script>
+</body>
+</html>
