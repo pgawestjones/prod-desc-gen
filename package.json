@@ -1,8 +1,9 @@
 {
-  "name": "paid-honeypot",
+  "name": "ai-product-description-generator",
   "version": "1.0.0",
-  "description": "A single-page web application that functions as a 'honeypot' to capture leads and automatically upsell them to a high-ticket service.",
-  "main": "api/generate.js",
+  "description": "A secure, production-ready web application that generates AI-powered product descriptions for e-commerce businesses.",
+  "type": "module",
+  "main": "src/api/generate.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

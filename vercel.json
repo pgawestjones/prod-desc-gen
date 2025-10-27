@@ -2,6 +2,15 @@
   "functions": {
     "src/api/generate.js": {
       "maxDuration": 30
+    },
+    "src/api/health.js": {
+      "maxDuration": 10
+    },
+    "src/api/unsubscribe.js": {
+      "maxDuration": 10
+    },
+    "src/api/privacy.js": {
+      "maxDuration": 10
     }
   },
   "headers": [
