@@ -66,12 +66,20 @@ function cleanCache() {
   }
 }
 
+// Get client IP from request headers
+function getClientIP(req) {
+  return req.headers['x-forwarded-for']?.split(',')[0] ||
+         req.headers['x-real-ip'] ||
+         req.connection?.remoteAddress ||
+         'unknown';
+}
+
 // Input validation and sanitization
 function validateAndSanitizeInput(data) {
   const { productName, productFeatures, email } = data;
 
   // Email validation with strict regex
-  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
   if (!email || !emailRegex.test(email.trim())) {
     return { valid: false, error: 'Invalid email address format' };
@@ -147,12 +155,17 @@ function checkRateLimit(ip) {
   return true;
 }
 
-// Get client IP from request headers
-function getClientIP(req) {
-  return req.headers['x-forwarded-for']?.split(',')[0] ||
-         req.headers['x-real-ip'] ||
-         req.connection?.remoteAddress ||
-         'unknown';
+// Structured logging function
+function logEvent(level, message, data = {}) {
+  const logData = {
+    timestamp: new Date().toISOString(),
+    level,
+    service: 'product-description-generator',
+    message,
+    ...data,
+    environment: process.env.NODE_ENV || 'development'
+  };
+  console.log(JSON.stringify(logData));
 }
 
 // --- Asset: LLM Prompt Template ---
@@ -191,7 +204,7 @@ const emailTemplates = {
   twoHour: (email) => ({
     subject: "Are your other product descriptions costing you sales?",
     html: `<p>Hi again,</p>
-           <p>That one description we sent you is already better than 90% of the descriptions online. But what about the rest of your store?</p>
+           <p>That one description we sent you is already better than 90% of descriptions online. But what about the rest of your store?</p>
            <p>Most e-commerce stores have descriptions that are:
            <ul>
              <li>Copied from the manufacturer</li>
@@ -226,20 +239,6 @@ const emailTemplates = {
   })
 };
 // --- End Assets ---
-
-
-// Structured logging function
-function logEvent(level, message, data = {}) {
-  const logData = {
-    timestamp: new Date().toISOString(),
-    level,
-    service: 'product-description-generator',
-    message,
-    ...data,
-    environment: process.env.NODE_ENV || 'development'
-  };
-  console.log(JSON.stringify(logData));
-}
 
 export default async function handler(req, res) {
   // Set security headers
@@ -281,7 +280,7 @@ export default async function handler(req, res) {
 
     const { productName, productFeatures, email } = validation.data;
 
-    // Check cache first (only for the description generation part)
+    // Check cache first (only for description generation part)
     const cacheKey = getCacheKey(productName, productFeatures);
     cleanCache(); // Clean expired entries
 
@@ -318,7 +317,11 @@ export default async function handler(req, res) {
       } catch (cacheError) {
         logEvent('WARN', 'Cache hit processing failed', {
           requestId,
-          error: cacheError.message
+          error: {
+            message: cacheError.message,
+            name: cacheError.name,
+            stack: cacheError.stack
+          }
         });
       }
 
@@ -357,7 +360,6 @@ export default async function handler(req, res) {
           details: dbError.details
         }
       });
-      // Don't block the user for a DB error, but log properly
     } else {
       logEvent('INFO', 'Data saved to database', { requestId });
     }
@@ -394,6 +396,7 @@ export default async function handler(req, res) {
     const stripeLink = process.env.STRIPE_CHECKOUT_LINK;
     const fromEmail = process.env.FROM_EMAIL || 'Your Name <sales@your-verified-domain.com>';
 
+    let emailsSentSuccessfully = false;
     try {
       // 1. Immediate Email
       const email1 = emailTemplates.immediate(description, email);
@@ -425,6 +428,7 @@ export default async function handler(req, res) {
           scheduled_at: new Date(Date.now() + 6 * 60 * 60 * 1000), // 6 hours
         });
       }
+      emailsSentSuccessfully = true;
     } catch (emailError) {
       logEvent('ERROR', 'Email sending failed', {
         requestId,
@@ -436,7 +440,9 @@ export default async function handler(req, res) {
         email: email
       });
       // Don't fail the request for email issues, but log for monitoring
-    } else {
+    }
+
+    if (emailsSentSuccessfully) {
       logEvent('INFO', 'All emails sent successfully', {
         requestId,
         email: email,
@@ -467,8 +473,7 @@ export default async function handler(req, res) {
       },
       request: {
         method: req.method,
-        ip: getClientIP(req),
-        userAgent: req.headers['user-agent']
+        ip: getClientIP(req)
       }
     });
 
